@@ -1,0 +1,4 @@
+beautifulsoup4
+PyPDF2
+requests
+azure-storage
