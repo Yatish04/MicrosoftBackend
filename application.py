@@ -9,6 +9,11 @@ import json
 # from PIL import Image
 # from matplotlib import patches
 from io import BytesIO
+import pymongo
+
+uri = "mongodb://yatish:O7EsukGSyf4XSr1rCo3QaskijO5KA5VoX2lPps9KM8eJVxKUdEg1KdcxvIYs9R1QsYRIq8oNf6E1osIshY3E2A==@yatish.documents.azure.com:10255/?ssl=true&replicaSet=globaldb"
+client = pymongo.MongoClient(uri)
+db = client.Azure
 
 # def plot(faces,image):
 #     plt.figure(figsize=(8, 8))
@@ -158,3 +163,46 @@ def temp(params):
     #import pdb; pdb.set_trace()
     res = Response(data.content,status=200,mimetype="image/jpeg")
     return res
+
+@app.route('/ngo/login', methods=['POST'])
+def login():
+    '''
+    data={"'E-mail':xxx,'password':'xxx'"}
+    '''
+    data = request.get_json()
+    ngo = db.ngo_data
+    logs = ngo.find_one({"E-mail":data["E-mail"]})
+    if logs["Password"] == data["Password"]:
+        session["E-mail"] = data["E-mail"]
+        return json.dumps({"status":200})
+    else:
+        return json.dumps({"status":500})
+
+
+@app.route('/ngo/resources',methods=['GET'])
+def resources():
+    # if "E-mail" not in session:
+    #     return json.dumps({"status":500})
+    donate = db.resources
+    import pdb; pdb.set_trace()
+    res=""
+    donated = donate.find()
+    for cur in donated:
+        res+="<tr>"
+        for attr in cur:
+            if attr == "_id":
+                continue
+            res+="<td>"+str(cur[attr])+"<td/>"
+        res+="<tr/>"
+
+    return json.dumps({"status":200,"data":res})
+
+@app.route('/ngo/resources/add',methods=["POST"])
+def add():
+    '''
+    {"Name","Address","city","donating items"}
+    '''
+    body = request.get_json()
+    donate = db.resources
+    donate.insert_one(body)
+    return json.dumps({"status":200})
