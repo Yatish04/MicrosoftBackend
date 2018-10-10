@@ -184,7 +184,6 @@ def resources():
     # if "E-mail" not in session:
     #     return json.dumps({"status":500})
     donate = db.resources
-    import pdb; pdb.set_trace()
     res=""
     donated = donate.find()
     for cur in donated:

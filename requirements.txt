@@ -3,4 +3,3 @@ PyPDF2
 requests
 azure-storage
 pymongo
-PIL
