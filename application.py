@@ -214,7 +214,7 @@ def add():
     return json.dumps({"status":200})
 
 
-@app.route('/victims/diasasters/clusters/<disasterid>')
+@app.route('/victims/diasasters/clusters/<disasterid>',methods=["GET"])
 def get_clusters(disasterid):
     
     kms_per_rad = 6371.0088
