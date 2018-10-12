@@ -3,3 +3,6 @@ PyPDF2
 requests
 azure-storage
 pymongo
+numpy
+scipy
+scikit-learn

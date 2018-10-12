@@ -1,6 +1,9 @@
 #import urllib3
 from bs4 import BeautifulSoup
 import requests,PyPDF2, io
+from sklearn.cluster import DBSCAN
+import numpy as np
+import pandas as pd
 #import pdb
 from flask import *
 from azure.storage.blob import BlockBlobService, PublicAccess
@@ -15,6 +18,10 @@ uri = "mongodb://yatish:O7EsukGSyf4XSr1rCo3QaskijO5KA5VoX2lPps9KM8eJVxKUdEg1Kdcx
 client = pymongo.MongoClient(uri)
 db = client.Azure
 
+she_url = "mongodb://kitwradr:uSnJYwRZ3plpfCuAUwSYhg5FQSAIu7p2wH8FKreJ5FQfolbYH1TcMnvtWnXZB1PKZBmGkATM8wHPiGwRNp2UhA==@kitwradr.documents.azure.com:10255/?ssl=true&replicaSet=globaldb"
+she_client = pymongo.MongoClient(she_url)
+she_db = she_client.LocationData
+she_dis = she_db.DisasterData
 # def plot(faces,image):
 #     plt.figure(figsize=(8, 8))
 #     ax = plt.imshow(image, alpha=0.6)
@@ -199,9 +206,63 @@ def resources():
 @app.route('/ngo/resources/add',methods=["POST"])
 def add():
     '''
-    {"Name","Address","city","donating items"}
+    {"Name","Address","city","phone number","donating items"}
     '''
     body = request.get_json()
     donate = db.resources
     donate.insert_one(body)
     return json.dumps({"status":200})
+
+
+@app.route('/victims/diasasters/clusters/<disasterid>')
+def get_clusters(disasterid):
+    
+    kms_per_rad = 6371.0088
+
+    victim_curr = db.Victim.find()
+
+    df = pd.DataFrame(list(victim_curr))
+
+
+    df = df[df["Disasterid"]==disasterid]
+    df["Long"] = df["Long"].astype("float")
+    df["Lat"] = df["Lat"].astype("float")
+    df["numvictims"] = df["numvictims"].astype("int")
+
+    epsilon = 0.3/kms_per_rad
+    safe_victims = df[df["issafe"]=="true"]
+    unsafe_victims= df[df["issafe"]=="false"]
+    dbsc_unsafe = DBSCAN(eps=epsilon, min_samples=1, algorithm='ball_tree', metric='haversine').fit(np.radians(unsafe_victims[['Lat','Long']].as_matrix()))
+    dbsc_safe = DBSCAN(eps=epsilon, min_samples=1, algorithm='ball_tree', metric='haversine').fit(np.radians(safe_victims[['Lat','Long']].as_matrix()))
+    safe_victims["Labels"] = list(dbsc_safe.labels_)
+    num_safe = len(dbsc_safe.labels_.tolist())
+    unsafe_victims["Labels"] = list(dbsc_unsafe.labels_)
+    num_unsafe = len(dbsc_unsafe.labels_.tolist())
+    safe_victims =  safe_victims.groupby("Labels").agg({"Lat":"mean","Long":"mean","numvictims":"count"}).reset_index()
+
+    unsafe_victims = unsafe_victims.groupby("Labels").agg({"Lat":"mean","Long":"mean","numvictims":"count"}).reset_index()
+
+    safe_dict = {}
+    unsafe_dict={}
+    for i in dbsc_safe.labels_:
+        lat = safe_victims[safe_victims["Labels"]==i]["Lat"].iloc[0]
+        long_ = safe_victims[safe_victims["Labels"]==i]["Long"].iloc[0]
+        num_ = safe_victims[safe_victims["Labels"]==i]["numvictims"].iloc[0]
+        safe_dict[str(i)]=[lat,long_,int(num_)]
+    
+    for i in dbsc_unsafe.labels_:
+        lat = unsafe_victims[unsafe_victims["Labels"]==i]["Lat"].iloc[0]
+        long_ = unsafe_victims[unsafe_victims["Labels"]==i]["Long"].iloc[0]
+        num_ = unsafe_victims[unsafe_victims["Labels"]==i]["numvictims"].iloc[0]
+        unsafe_dict[str(i)]=[lat,long_,int(num_)]
+
+    res={}
+    res["status"]=200
+    res["numsafe"] = num_safe
+    res["numunsafe"] = num_unsafe
+    res["safe"] = safe_dict
+    res["unsafe"] = unsafe_dict
+
+    return json.dumps(res)
+
+    
