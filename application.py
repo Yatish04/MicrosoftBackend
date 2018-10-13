@@ -1,5 +1,6 @@
 #import urllib3
 from bs4 import BeautifulSoup
+from bson import ObjectId   
 import requests,PyPDF2, io
 from sklearn.cluster import DBSCAN
 import numpy as np
@@ -126,8 +127,8 @@ def get_facial(data):
     res["ids"] = faces
     return res
 
-@app.route('/facial',methods=['POST'])
-def facial():
+@app.route('/victims/<userid>/facial',methods=['POST'])
+def facial(userid):
     # import pdb; pdb.set_trace()
     data=bytes(request.get_data())
     res={}
@@ -136,6 +137,14 @@ def facial():
     except:
         res['status'] = '404'
     print(res)
+    if re['status'] !='404':
+        cursor = db.Victim
+        posts = cursor.find_one({"user_id":userid})
+        if "numvictims" not in posts:
+            posts["numvictims"] = res["num"]
+        else:
+            posts["numvictims"] += res["num"]
+        cursor.update_one({"user_id":userid},{"$set",cursor},upsert=False)
     return json.dumps(res)
 
 
@@ -155,7 +164,7 @@ def send_rescuer():
     return json.dumps({"status":200})
 
 
-@app.route('/disaster/<params>',methods=['GET'])
+@app.route('/disaster/assets/<params>',methods=['GET'])
 def temp(params):
     block_blob_service = BlockBlobService(account_name='rvsafeimages', account_key='391TMmlvDdRWu+AsNX+ZMl1i233YQfP5dxo/xhMrPm22KtwWwwMmM9vFAJpJHrGXyBrTW4OoAInjHnby9Couug==')
     container_name ='imagescontainer'
@@ -206,7 +215,7 @@ def resources():
 @app.route('/ngo/resources/add',methods=["POST"])
 def add():
     '''
-    {"Name","Address","city","phone number","donating items"}
+    {"userid","","city","phone number","donating items"}
     '''
     body = request.get_json()
     donate = db.resources
@@ -265,4 +274,66 @@ def get_clusters(disasterid):
 
     return json.dumps(res)
 
+@app.route('/victims/update', methods=["POST"])
+def update_location():
+    '''
+    {
+        'id'
+        "user_id is a foreign key
+    }
+    '''
+    req = request.get_json()
+    import pdb; pdb.set_trace()
+    ref = db.Victim
+    cursor = ref.find_one({'user_id':req["user_id"]})
+    if cursor is None:
+        ref.insert_one(req)
+    else:
+        post = ref.find_one({"user_id":req["user_id"]})
+        import pdb; pdb.set_trace()
+        for attr in req:
+            post[attr] = req[attr]
+        ref.update_one({"user_id":req["user_id"]},{"$set":post},upsert=False)
+    return json.dumps({"status":200})
+
+@app.route('/victim/upload/images/<userid>/<format_>/blob', methods=["POST"])
+def upload_images(userid,format_):
+    data = request.get_data()
+    ref = db.Victim
+    cursor = ref.find_one({'user_id':userid})
+    if len(list(cursor)) == 0:
+        assert("Upload Failed")
+    import pdb; pdb.set_trace()
+    if "num_files" not in cursor:
+        cursor["num_files"] = 0
+    nums = int(cursor["num_files"]) #nums has to be set to 0.
+    nums+=1
+    cursor["num_files"] = nums
+    if "blobnames" not in cursor:
+        files=[]
+    else:
+        files = cursor["blobnames"]
+    import pdb; pdb.set_trace()
+    uid=userid+str(nums)
+    files.append(uid+"."+format_)
+    cursor["blobnames"] = files
+    ref.update_one({"user_id":userid},{"$set":cursor},upsert=False)
+    block_blob_service = BlockBlobService(account_name='rvsafeimages', account_key='391TMmlvDdRWu+AsNX+ZMl1i233YQfP5dxo/xhMrPm22KtwWwwMmM9vFAJpJHrGXyBrTW4OoAInjHnby9Couug==')
+    import pdb; pdb.set_trace()
+    container_name ='imagescontainer'
+    block_blob_service.create_blob_from_bytes(container_name,uid+"."+format_,data)
+    #save to blob
+    return json.dumps({"status":200})
     
+    
+
+@app.route('/victim/download/images/<userid>/blob',methods=["POST"])
+def download(userid):
+    ref = db.Victim
+    cursor = ref.find_one({"user_id":userid})
+    base_url = "http://aztests.azurewebsites.net/disaster/assets"
+    lists=[]
+    for i in cursor["blobnames"]:
+        lists.append(base_url+'/'+i)
+
+    return json.dumps({"status":200,"links":lists})
