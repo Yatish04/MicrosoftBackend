@@ -283,14 +283,12 @@ def update_location():
     }
     '''
     req = request.get_json()
-    import pdb; pdb.set_trace()
     ref = db.Victim
     cursor = ref.find_one({'user_id':req["user_id"]})
     if cursor is None:
         ref.insert_one(req)
     else:
         post = ref.find_one({"user_id":req["user_id"]})
-        import pdb; pdb.set_trace()
         for attr in req:
             post[attr] = req[attr]
         ref.update_one({"user_id":req["user_id"]},{"$set":post},upsert=False)
@@ -303,7 +301,6 @@ def upload_images(userid,format_):
     cursor = ref.find_one({'user_id':userid})
     if len(list(cursor)) == 0:
         assert("Upload Failed")
-    import pdb; pdb.set_trace()
     if "num_files" not in cursor:
         cursor["num_files"] = 0
     nums = int(cursor["num_files"]) #nums has to be set to 0.
@@ -313,13 +310,11 @@ def upload_images(userid,format_):
         files=[]
     else:
         files = cursor["blobnames"]
-    import pdb; pdb.set_trace()
     uid=userid+str(nums)
     files.append(uid+"."+format_)
     cursor["blobnames"] = files
     ref.update_one({"user_id":userid},{"$set":cursor},upsert=False)
     block_blob_service = BlockBlobService(account_name='rvsafeimages', account_key='391TMmlvDdRWu+AsNX+ZMl1i233YQfP5dxo/xhMrPm22KtwWwwMmM9vFAJpJHrGXyBrTW4OoAInjHnby9Couug==')
-    import pdb; pdb.set_trace()
     container_name ='imagescontainer'
     block_blob_service.create_blob_from_bytes(container_name,uid+"."+format_,data)
     #save to blob
