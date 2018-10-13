@@ -137,7 +137,7 @@ def facial(userid):
     except:
         res['status'] = '404'
     print(res)
-    if re['status'] !='404':
+    if res['status'] !='404':
         cursor = db.Victim
         posts = cursor.find_one({"user_id":userid})
         if "numvictims" not in posts:
@@ -204,10 +204,11 @@ def resources():
     donated = donate.find()
     for cur in donated:
         res+="<tr>"
-        for attr in cur:
-            if attr == "_id":
-                continue
-            res+="<td>"+str(cur[attr])+"<td/>"
+        res+="<td>"+str(cur["Name"])+"<td/>"
+        res+="<td>"+str(cur["Address"])+"<td/>"
+        res+="<td>"+str(cur["City"])+"<td/>"
+        res+="<td>"+str(cur["Phone Number"])+"<td/>"
+        res+="<td>"+str(cur["Items"])+"<td/>"
         res+="<tr/>"
 
     return json.dumps({"status":200,"data":res})
@@ -218,7 +219,15 @@ def add():
     {"userid","","city","phone number","donating items"}
     '''
     body = request.get_json()
+    import pdb; pdb.set_trace()
+    master = db.Master
+    curr = master.find_one({"_id":ObjectId(body["id"])})
+    body["Name"] = curr["Name"]
     donate = db.resources
+    try:
+        del body["id"]
+    except:
+        pass
     donate.insert_one(body)
     return json.dumps({"status":200})
 
@@ -330,5 +339,5 @@ def download(userid):
     lists=[]
     for i in cursor["blobnames"]:
         lists.append(base_url+'/'+i)
-
+    lists = lists[len(lists)-3:]
     return json.dumps({"status":200,"links":lists})
