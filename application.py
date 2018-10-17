@@ -194,7 +194,7 @@ def facial(userid):
     return json.dumps(res)
 
 
-@app.route('/victim/mapdata',methods=['POST'])
+@app.route('/rescuer/mapdata',methods=['POST'])
 def send():
     '''
     {
@@ -231,10 +231,7 @@ def send():
 
     return json.dumps({"status":200,"data":res})
 
-@app.route('/rescuer/mapdata',methods=['POST'])
-def send_rescuer():
-    data = request.get_json()
-    return json.dumps({"status":200})
+
 
 
 @app.route('/disaster/assets/<params>',methods=['GET'])
