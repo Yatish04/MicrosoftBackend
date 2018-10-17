@@ -100,6 +100,26 @@ def city_weather(city):
         res['url'] = base
     return json.dumps(res)
 
+@app.route("/register",methods=["POST"])
+def register():
+    reg = request.get_json()
+    cursor = db.Master
+    cursor.insert_one(reg)
+    req = cursor.find_one({"Name":reg["Name"]})
+    id_ = str(req["_id"])
+    return json.dumps({"status":200,"id":id_})
+
+@app.route("/login",methods=["POST"])
+def login_():
+    reg = request.get_json
+    cursor = db.Master
+    req = cursor.find_one({"Name":reg["Name"]})
+    
+    if req is None or req["Password"] !=reg["Password"]:
+        return json.dumps({"status":300,"loggedin":"false","id":""})
+    id_ = str(req["_id"])
+    return json.dumps({"status":200,"loggedin":"true","id":id_})    
+
 
 def get_facial(data):
     face_api_url = 'https://southeastasia.api.cognitive.microsoft.com/face/v1.0/detect'
@@ -136,27 +156,80 @@ def facial(userid):
         res = get_facial(data)
     except:
         res['status'] = '404'
-    print(res)
+    import pprint
+    pprint.pprint(res)
+    # import pdb; pdb.set_trace()
+    num_males=0
+    num_females=0
+    num_elders=0
+    num_children=0
+    faces = res["ids"]
+    for i in range(int((res["num"]))):
+        if faces[i]['faceAttributes']['gender'].lower() == 'male':
+            num_males+=1
+        if faces[i]['faceAttributes']['gender'].lower() == 'female':
+            num_females+=1
+        
+        if int(faces[i]['faceAttributes']['age']) > 50:
+            num_elders+=1
+        if int(faces[i]['faceAttributes']['age']<15):
+            num_children+=1
+
+    # print(res)
     if res['status'] !='404':
         cursor = db.Victim
         posts = cursor.find_one({"user_id":userid})
-        if "numvictims" not in posts:
-            posts["numvictims"] = res["num"]
+
+        posts["numvictims"] = res["num"]
+        posts["victims"]={"children":num_children,"elders":num_elders,"female":num_females,"males":num_males}
+        if posts["issafe"] == "true":
+            posts["priority"] = 0
+        elif int(res["num"]) <=2:
+            posts["priority"] = 0
+        elif int(res["num"])>2 and int(res["num"])<=4:
+            posts["priority"] = 1
         else:
-            posts["numvictims"] += res["num"]
-        cursor.update_one({"user_id":userid},{"$set",cursor},upsert=False)
+            posts["priority"] = 2
+        cursor.update_one({"user_id":userid},{"$set":posts},upsert=False)
     return json.dumps(res)
 
 
-@app.route('/victim/location',methods=['POST'])
-def location():
-    data = request.get_json()
-    return json.dumps({"status":200})
-
 @app.route('/victim/mapdata',methods=['POST'])
 def send():
-    data=request.get_json()
-    return json.dumps({"status":200})
+    '''
+    {
+        1:{
+        "lat":lat,
+        longs:long,
+        "numstuck":"4",
+        "priority":"0-2",
+        "children:"2",,
+        "female":3
+        "elders":"2"
+        }
+
+    }
+    '''
+    reqs = db.Victim
+    result = reqs.find()
+    i=0
+    res={}
+    for iter_ in result:
+        if i==4:
+            break
+        res[iter_["user_id"]]={}
+        res[iter_["user_id"]]["Lat"] = iter_["Lat"]
+        res[iter_["user_id"]]["Long"] = iter_["Long"]
+        res[iter_["user_id"]]["numstuck"] = iter_["numvictims"]
+        res[iter_["user_id"]]["priority"] = iter_["priority"]
+        res[iter_["user_id"]]["female"] = iter_["victims"]["female"]
+        res[iter_["user_id"]]["male"] = iter_["victims"]["males"]
+        res[iter_["user_id"]]["elders"] = iter_["victims"]["elders"]
+        i+=1
+
+
+
+    return json.dumps({"status":200,"data":res})
 
 @app.route('/rescuer/mapdata',methods=['POST'])
 def send_rescuer():
@@ -180,46 +253,13 @@ def temp(params):
     res = Response(data.content,status=200,mimetype="image/jpeg")
     return res
 
-@app.route('/ngo/login', methods=['POST'])
-def login():
-    '''
-    data={"'E-mail':xxx,'password':'xxx'"}
-    '''
-    data = request.get_json()
-    ngo = db.ngo_data
-    logs = ngo.find_one({"E-mail":data["E-mail"]})
-    if logs["Password"] == data["Password"]:
-        session["E-mail"] = data["E-mail"]
-        return json.dumps({"status":200})
-    else:
-        return json.dumps({"status":500})
-
-
-@app.route('/ngo/resources',methods=['GET'])
-def resources():
-    # if "E-mail" not in session:
-    #     return json.dumps({"status":500})
-    donate = db.resources
-    res=""
-    donated = donate.find()
-    for cur in donated:
-        res+="<tr>"
-        res+="<td>"+str(cur["Name"])+"<td/>"
-        res+="<td>"+str(cur["Address"])+"<td/>"
-        res+="<td>"+str(cur["City"])+"<td/>"
-        res+="<td>"+str(cur["Phone Number"])+"<td/>"
-        res+="<td>"+str(cur["Items"])+"<td/>"
-        res+="<tr/>"
-
-    return json.dumps({"status":200,"data":res})
-
 @app.route('/ngo/resources/add',methods=["POST"])
 def add():
     '''
-    {"userid","","city","phone number","donating items"}
+        {"userid","","city","phone number","donating items"}
     '''
     body = request.get_json()
-    import pdb; pdb.set_trace()
+    # import pdb; pdb.set_trace()
     master = db.Master
     curr = master.find_one({"_id":ObjectId(body["id"])})
     body["Name"] = curr["Name"]
@@ -302,6 +342,8 @@ def update_location():
             post[attr] = req[attr]
         ref.update_one({"user_id":req["user_id"]},{"$set":post},upsert=False)
     return json.dumps({"status":200})
+
+
 
 @app.route('/victim/upload/images/<userid>/<format_>/blob', methods=["POST"])
 def upload_images(userid,format_):
