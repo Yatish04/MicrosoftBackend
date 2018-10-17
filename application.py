@@ -210,23 +210,24 @@ def send():
 
     }
     '''
+    
     reqs = db.Victim
     result = reqs.find()
     i=0
     res={}
-    for iter_ in result:
-        if i==4:
-            break
-        res[iter_["user_id"]]={}
-        res[iter_["user_id"]]["Lat"] = iter_["Lat"]
-        res[iter_["user_id"]]["Long"] = iter_["Long"]
-        res[iter_["user_id"]]["numstuck"] = iter_["numvictims"]
-        res[iter_["user_id"]]["priority"] = iter_["priority"]
-        res[iter_["user_id"]]["female"] = iter_["victims"]["female"]
-        res[iter_["user_id"]]["male"] = iter_["victims"]["males"]
-        res[iter_["user_id"]]["elders"] = iter_["victims"]["elders"]
-        i+=1
-
+    df = pd.DataFrame(list(result))
+    df = df.sample(n=4).reset_index()
+    
+    for i in range(len(df)):
+        res[df.iloc[i]["user_id"]]={}
+        res[df.iloc[i]["user_id"]]["Lat"] = df.iloc[i]["Lat"]
+        res[df.iloc[i]["user_id"]]["Long"] = df.iloc[i]["Long"]
+        res[df.iloc[i]["user_id"]]["numstuck"] = str(df.iloc[i]["numvictims"])
+        res[df.iloc[i]["user_id"]]["priority"] = str(df.iloc[i]["priority"])
+        res[df.iloc[i]["user_id"]]["female"] = df.iloc[i]["victims"]["female"]
+        res[df.iloc[i]["user_id"]]["male"] = df.iloc[i]["victims"]["males"]
+        res[df.iloc[i]["user_id"]]["elders"] = df.iloc[i]["victims"]["elders"]
+        res[df.iloc[i]["user_id"]]["children"] = df.iloc[i]["victims"]["children"]
 
 
     return json.dumps({"status":200,"data":res})
@@ -269,15 +270,15 @@ def add():
     return json.dumps({"status":200})
 
 
-@app.route('/victims/diasasters/clusters/<disasterid>',methods=["GET"])
+@app.route('/victims/disasters/clusters/<disasterid>',methods=["GET"])
 def get_clusters(disasterid):
     
     kms_per_rad = 6371.0088
 
-    victim_curr = db.Victim.find()
-
-    df = pd.DataFrame(list(victim_curr))
-
+    # for i in victim_curr:
+    #     import pdb; pdb.set_trace()
+    #     print(i)
+    df = pd.DataFrame(list(db.Victim.find()))
 
     df = df[df["Disasterid"]==disasterid]
     df["Long"] = df["Long"].astype("float")
@@ -296,7 +297,6 @@ def get_clusters(disasterid):
     safe_victims =  safe_victims.groupby("Labels").agg({"Lat":"mean","Long":"mean","numvictims":"count"}).reset_index()
 
     unsafe_victims = unsafe_victims.groupby("Labels").agg({"Lat":"mean","Long":"mean","numvictims":"count"}).reset_index()
-
     safe_dict = {}
     unsafe_dict={}
     for i in dbsc_safe.labels_:
