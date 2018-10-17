@@ -216,19 +216,47 @@ def send():
     i=0
     res={}
     df = pd.DataFrame(list(result))
-    df = df.sample(n=4).reset_index()
-    
-    for i in range(len(df)):
-        res[df.iloc[i]["user_id"]]={}
-        res[df.iloc[i]["user_id"]]["Lat"] = df.iloc[i]["Lat"]
-        res[df.iloc[i]["user_id"]]["Long"] = df.iloc[i]["Long"]
-        res[df.iloc[i]["user_id"]]["numstuck"] = str(df.iloc[i]["numvictims"])
-        res[df.iloc[i]["user_id"]]["priority"] = str(df.iloc[i]["priority"])
-        res[df.iloc[i]["user_id"]]["female"] = df.iloc[i]["victims"]["female"]
-        res[df.iloc[i]["user_id"]]["male"] = df.iloc[i]["victims"]["males"]
-        res[df.iloc[i]["user_id"]]["elders"] = df.iloc[i]["victims"]["elders"]
-        res[df.iloc[i]["user_id"]]["children"] = df.iloc[i]["victims"]["children"]
+    wdf = df.sample(n=4).reset_index()
+    df = df.reset_index()
+    base = "https://rvsafeimages.blob.core.windows.net/imagescontainer/"
+    for i in range(len(wdf)):
+        res[wdf.iloc[i]["user_id"]]={}
+        res[wdf.iloc[i]["user_id"]]["Lat"] = wdf.iloc[i]["Lat"]
+        res[wdf.iloc[i]["user_id"]]["Long"] = wdf.iloc[i]["Long"]
+        res[wdf.iloc[i]["user_id"]]["numstuck"] = str(wdf.iloc[i]["numvictims"])
+        res[wdf.iloc[i]["user_id"]]["priority"] = str(wdf.iloc[i]["priority"])
+        res[wdf.iloc[i]["user_id"]]["female"] = wdf.iloc[i]["victims"]["female"]
+        res[wdf.iloc[i]["user_id"]]["male"] = wdf.iloc[i]["victims"]["males"]
+        res[wdf.iloc[i]["user_id"]]["elders"] = wdf.iloc[i]["victims"]["elders"]
+        res[wdf.iloc[i]["user_id"]]["children"] = wdf.iloc[i]["victims"]["children"]
+        li = ['jpeg.jpg','jpeg.jpg','jpeg.jpg']
+        urls=[]
+        if len(li)> 3:
+            for k in li[len(li)-3:]:
+                urls.append(base+k)
+        else:
+            for k in li:    
+                urls.append(base+k)
+        res[wdf.iloc[i]["user_id"]]["blobs"] = urls
+    res[df.iloc[0]["user_id"]]={}
+    res[df.iloc[0]["user_id"]]["Lat"] = df.iloc[0]["Lat"]
+    res[df.iloc[0]["user_id"]]["Long"] = df.iloc[0]["Long"]
+    res[df.iloc[0]["user_id"]]["numstuck"] = str(df.iloc[0]["numvictims"])
+    res[df.iloc[0]["user_id"]]["priority"] = str(df.iloc[0]["priority"])
+    res[df.iloc[0]["user_id"]]["female"] = df.iloc[0]["victims"]["female"]
+    res[df.iloc[0]["user_id"]]["male"] = df.iloc[0]["victims"]["males"]
+    res[df.iloc[0]["user_id"]]["elders"] = df.iloc[0]["victims"]["elders"]
+    res[df.iloc[0]["user_id"]]["children"] = df.iloc[0]["victims"]["children"]
+    li = ['jpeg.jpg','jpeg.jpg','jpeg.jpg']
+    urls=[]
+    if len(li)> 3:
+        for k in li[len(li)-3:]:
+            urls.append(base+k)
+    else:
+        for k in li:
+            urls.append(base+k)
 
+    res[df.iloc[0]["user_id"]]["blobs"] = urls
 
     return json.dumps({"status":200,"data":res})
 
