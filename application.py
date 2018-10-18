@@ -247,7 +247,8 @@ def send():
     res[df.iloc[0]["user_id"]]["male"] = df.iloc[0]["victims"]["males"]
     res[df.iloc[0]["user_id"]]["elders"] = df.iloc[0]["victims"]["elders"]
     res[df.iloc[0]["user_id"]]["children"] = df.iloc[0]["victims"]["children"]
-    li = ['jpeg.jpg','jpeg.jpg','jpeg.jpg']
+    blobnames = df.iloc[0]["blobnames"]
+    li = blobnames[len(blobnames)-3:]
     urls=[]
     if len(li)> 3:
         for k in li[len(li)-3:]:
