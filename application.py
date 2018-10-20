@@ -221,7 +221,6 @@ def send():
     df = df.reset_index()
     users=["1","2","3","4"]
     iters_=0
-    import pdb; pdb.set_trace()
     base = "https://rvsafeimages.blob.core.windows.net/imagescontainer/"
     for i in range(len(wdf)):
         userid=users[iters_]
