@@ -235,7 +235,7 @@ def send():
         res[userid]["children"] = wdf.iloc[i]["victims"]["children"]
         res[userid]["user_id"] = str(userid)
         iters_+=1
-        li = ['jpeg.jpg','landmark1.jpg','landmark2.jpg','landmark2.jpg','landmark3.jpg','landmark4.jpg','landmark5','landmark6','landmark7','landmark8']
+        li = ['jpeg.jpg','landmark1.jpg','landmark2.jpg','landmark2.jpg','landmark3.jpg','landmark4.jpg','landmark5.jpg','landmark6.jpg','landmark7.jpg','landmark8.jpg']
         li=random.sample(li,3)
         urls=[]
         if len(li)> 3:
