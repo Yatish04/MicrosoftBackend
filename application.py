@@ -229,6 +229,7 @@ def send():
         res[wdf.iloc[i]["user_id"]]["male"] = wdf.iloc[i]["victims"]["males"]
         res[wdf.iloc[i]["user_id"]]["elders"] = wdf.iloc[i]["victims"]["elders"]
         res[wdf.iloc[i]["user_id"]]["children"] = wdf.iloc[i]["victims"]["children"]
+        res[wdf.iloc[i]["user_id"]]["user_id"] = str(wdf.iloc[i]["user_id"])
         li = ['jpeg.jpg','jpeg.jpg','jpeg.jpg']
         urls=[]
         if len(li)> 3:
@@ -247,6 +248,7 @@ def send():
     res[df.iloc[0]["user_id"]]["male"] = df.iloc[0]["victims"]["males"]
     res[df.iloc[0]["user_id"]]["elders"] = df.iloc[0]["victims"]["elders"]
     res[df.iloc[0]["user_id"]]["children"] = df.iloc[0]["victims"]["children"]
+    res[df.iloc[0]["user_id"]]["user_id"] = str(df.iloc[0]["user_id"])
     blobnames = df.iloc[0]["blobnames"]
     li = blobnames[len(blobnames)-3:]
     urls=[]
