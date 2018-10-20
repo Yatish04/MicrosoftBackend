@@ -159,7 +159,7 @@ def facial(userid):
         res['status'] = '404'
     import pprint
     pprint.pprint(res)
-    # import pdb; pdb.set_trace()
+    import pdb; pdb.set_trace()
     num_males=0
     num_females=0
     num_elders=0
@@ -217,10 +217,12 @@ def send():
     i=0
     res={}
     df = pd.DataFrame(list(result))
-    wdf = df.sample(n=4).reset_index()
+    wdf = df.sample(n=3).reset_index()
     df = df.reset_index()
     users=["1","2","3","4"]
+    iter_images=0
     iters_=0
+    li = ['landmark1.jpg','landmark2.jpg','landmark3.jpg','landmark4.jpg','landmark5.jpg','landmark6.jpg','landmark7.jpg','landmark8.jpg','landmark9.jpg',"jpeg.jpg"]
     base = "https://rvsafeimages.blob.core.windows.net/imagescontainer/"
     for i in range(len(wdf)):
         userid=users[iters_]
@@ -235,15 +237,16 @@ def send():
         res[userid]["children"] = wdf.iloc[i]["victims"]["children"]
         res[userid]["user_id"] = str(userid)
         iters_+=1
-        li = ['jpeg.jpg','landmark1.jpg','landmark2.jpg','landmark2.jpg','landmark3.jpg','landmark4.jpg','landmark5.jpg','landmark6.jpg','landmark7.jpg','landmark8.jpg']
-        li=random.sample(li,3)
+        
         urls=[]
-        if len(li)> 3:
-            for k in li[len(li)-3:]:
-                urls.append(base+k)
-        else:
-            for k in li:    
-                urls.append(base+k)
+
+        for nums in range(0,3):
+            k = li[iter_images]
+            iter_images+=1
+            urls.append(base+k)
+
+
+  
         res[userid]["blobs"] = urls
     res[df.iloc[0]["user_id"]]={}
     res[df.iloc[0]["user_id"]]["Lat"] = df.iloc[0]["Lat"]
