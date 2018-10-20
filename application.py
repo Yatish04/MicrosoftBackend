@@ -13,6 +13,7 @@ import json
 # from PIL import Image
 # from matplotlib import patches
 from io import BytesIO
+import random
 import pymongo
 
 uri = "mongodb://yatish:O7EsukGSyf4XSr1rCo3QaskijO5KA5VoX2lPps9KM8eJVxKUdEg1KdcxvIYs9R1QsYRIq8oNf6E1osIshY3E2A==@yatish.documents.azure.com:10255/?ssl=true&replicaSet=globaldb"
@@ -218,19 +219,25 @@ def send():
     df = pd.DataFrame(list(result))
     wdf = df.sample(n=4).reset_index()
     df = df.reset_index()
+    users=["1","2","3","4"]
+    iters_=0
+    import pdb; pdb.set_trace()
     base = "https://rvsafeimages.blob.core.windows.net/imagescontainer/"
     for i in range(len(wdf)):
-        res[wdf.iloc[i]["user_id"]]={}
-        res[wdf.iloc[i]["user_id"]]["Lat"] = wdf.iloc[i]["Lat"]
-        res[wdf.iloc[i]["user_id"]]["Long"] = wdf.iloc[i]["Long"]
-        res[wdf.iloc[i]["user_id"]]["numstuck"] = str(wdf.iloc[i]["numvictims"])
-        res[wdf.iloc[i]["user_id"]]["priority"] = str(wdf.iloc[i]["priority"])
-        res[wdf.iloc[i]["user_id"]]["female"] = wdf.iloc[i]["victims"]["female"]
-        res[wdf.iloc[i]["user_id"]]["male"] = wdf.iloc[i]["victims"]["males"]
-        res[wdf.iloc[i]["user_id"]]["elders"] = wdf.iloc[i]["victims"]["elders"]
-        res[wdf.iloc[i]["user_id"]]["children"] = wdf.iloc[i]["victims"]["children"]
-        res[wdf.iloc[i]["user_id"]]["user_id"] = str(wdf.iloc[i]["user_id"])
-        li = ['jpeg.jpg','jpeg.jpg','jpeg.jpg']
+        userid=users[iters_]
+        res[userid]={}
+        res[userid]["Lat"] = wdf.iloc[i]["Lat"]
+        res[userid]["Long"] = wdf.iloc[i]["Long"]
+        res[userid]["numstuck"] = str(wdf.iloc[i]["numvictims"])
+        res[userid]["priority"] = str(wdf.iloc[i]["priority"])
+        res[userid]["female"] = wdf.iloc[i]["victims"]["female"]
+        res[userid]["male"] = wdf.iloc[i]["victims"]["males"]
+        res[userid]["elders"] = wdf.iloc[i]["victims"]["elders"]
+        res[userid]["children"] = wdf.iloc[i]["victims"]["children"]
+        res[userid]["user_id"] = str(userid)
+        iters_+=1
+        li = ['jpeg.jpg','landmark1.jpg','landmark2.jpg','landmark2.jpg','landmark3.jpg','landmark4.jpg','landmark5','landmark6','landmark7','landmark8']
+        li=random.sample(li,3)
         urls=[]
         if len(li)> 3:
             for k in li[len(li)-3:]:
@@ -238,7 +245,7 @@ def send():
         else:
             for k in li:    
                 urls.append(base+k)
-        res[wdf.iloc[i]["user_id"]]["blobs"] = urls
+        res[userid]["blobs"] = urls
     res[df.iloc[0]["user_id"]]={}
     res[df.iloc[0]["user_id"]]["Lat"] = df.iloc[0]["Lat"]
     res[df.iloc[0]["user_id"]]["Long"] = df.iloc[0]["Long"]
