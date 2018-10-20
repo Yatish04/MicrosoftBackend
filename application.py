@@ -293,10 +293,11 @@ def add():
     '''
         {"userid","","city","phone number","donating items"}
     '''
+    import pdb; pdb.set_trace()
     body = request.get_json()
     # import pdb; pdb.set_trace()
     master = db.Master
-    curr = master.find_one({"_id":ObjectId(body["id"])})
+    curr = master.find_one({"userid":body["id"]})
     body["Name"] = curr["Name"]
     donate = db.resources
     try:
