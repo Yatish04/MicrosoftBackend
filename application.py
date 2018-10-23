@@ -301,8 +301,9 @@ def add():
     # import pdb; pdb.set_trace()
     master = db.Master
     curr = master.find_one({"userid":body["id"]})
-    body["Name"] = curr["Name"]
+    body["Name"] = "Shubham"
     donate = db.resources
+    
     try:
         del body["id"]
     except:
