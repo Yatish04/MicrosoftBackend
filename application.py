@@ -426,4 +426,9 @@ def download(userid):
 def download_app():
     # import pdb; pdb.set_trace()
     import os
-    return send_file(os.getcwd()+'/app-debug.apk',as_attachment=True,attachment_filename='app-debug.apk')
+    return send_file(os.getcwd()+'/RVSAFE.apk',as_attachment=True,attachment_filename='RVSAFE.apk')
+
+@app.route('/download/server',methods=["GET"])
+def download_server():
+    import os
+    return send_file(os.getcwd()+'/InstaHelp.apk',as_attachment=True,attachment_filename='InstaHelp.apk')
