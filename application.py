@@ -421,3 +421,9 @@ def download(userid):
         lists.append(base_url+'/'+i)
     lists = lists[len(lists)-3:]
     return json.dumps({"status":200,"links":lists})
+
+@app.route('/download', methods=["GET"])
+def download_app():
+    # import pdb; pdb.set_trace()
+    import os
+    return send_file(os.getcwd()+'/app-debug.apk',as_attachment=True,attachment_filename='app-debug.apk')
