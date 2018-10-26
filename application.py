@@ -159,7 +159,6 @@ def facial(userid):
         res['status'] = '404'
     import pprint
     pprint.pprint(res)
-    import pdb; pdb.set_trace()
     num_males=0
     num_females=0
     num_elders=0
