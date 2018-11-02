@@ -370,17 +370,17 @@ def get_clusters(disasterid):
 
 def update_nearest(latitude,longitude):
     ref = she_db.RescueGroupData.find_one({"_id":1})
-    
     df = pd.DataFrame(list(db.Victim.find()))
     df = df[df["issafe"]=="true"]
     df["Lat"] = df["Lat"].astype("float")
     df["Long"] = df["Long"].astype("float")
     df["mins"] = (df["Lat"]-float(latitude))**2+(df["Long"]-float(longitude))**2
-
     min_ = min(i for i in df["mins"] if i > 0)
     series = df[df["mins"]==min_]
-    ref["latitude"] = series.iloc[0]["Lat"]
-    ref["longitude"] = series.iloc[0]["Long"]
+    ref["latitude"] = str(series.iloc[0]["Lat"])
+    ref["longitude"] = str(series.iloc[0]["Long"])
+    ref["longitude"] = "77.482015"
+    ref["latitude"] = "12.910761"
     she_db.RescueGroupData.update_one({"_id":1},{"$set":ref},upsert=False)
 
 
