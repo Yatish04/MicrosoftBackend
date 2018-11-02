@@ -377,10 +377,10 @@ def update_nearest(latitude,longitude):
     df["mins"] = (df["Lat"]-float(latitude))**2+(df["Long"]-float(longitude))**2
     min_ = min(i for i in df["mins"] if i > 0)
     series = df[df["mins"]==min_]
-    ref["latitude"] = str(series.iloc[0]["Lat"])
-    ref["longitude"] = str(series.iloc[0]["Long"])
-    ref["longitude"] = "77.4891"
-    ref["latitude"] = "12.9223"
+    ref["latitude"] = series.iloc[0]["Lat"]
+    ref["longitude"] = series.iloc[0]["Long"]
+    ref["longitude"] = 77.4891
+    ref["latitude"] = 12.9223
     she_db.RescueGroupData.update_one({"_id":1},{"$set":ref},upsert=False)
 
 
