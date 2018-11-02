@@ -152,17 +152,34 @@ def get_facial(data):
     res["ids"] = faces
     return res
 
+
+def addfacial(data,user_id,format_):
+    ref = db.Victim
+    cursor = ref.find_one({'user_id':user_id})
+    if len(list(cursor)) == 0:
+        assert("Upload Failed")
+    
+    uid=user_id+"facial"
+    cursor["facial"] = "https://rvsafeimages.blob.core.windows.net/imagescontainer/"+uid+'.'+format_
+    ref.update_one({"user_id":user_id},{"$set":cursor},upsert=False)
+    block_blob_service = BlockBlobService(account_name='rvsafeimages', account_key='391TMmlvDdRWu+AsNX+ZMl1i233YQfP5dxo/xhMrPm22KtwWwwMmM9vFAJpJHrGXyBrTW4OoAInjHnby9Couug==')
+    container_name ='imagescontainer'
+    block_blob_service.create_blob_from_bytes(container_name,uid+"."+format_,data)
+    #save to blob
+
+    
+
+
 @app.route('/victims/<userid>/facial',methods=['POST'])
 def facial(userid):
     # import pdb; pdb.set_trace()
     data=bytes(request.get_data())
     res={}
+    addfacial(data,userid,"jpg")
     try:
         res = get_facial(data)
     except:
         res['status'] = '404'
-    import pprint
-    pprint.pprint(res)
     num_males=0
     num_females=0
     num_elders=0
@@ -377,8 +394,8 @@ def update_nearest(latitude,longitude):
     df["mins"] = (df["Lat"]-float(latitude))**2+(df["Long"]-float(longitude))**2
     min_ = min(i for i in df["mins"] if i > 0)
     series = df[df["mins"]==min_]
-    ref["latitude"] = series.iloc[0]["Lat"]
-    ref["longitude"] = series.iloc[0]["Long"]
+    # ref["latitude"] = series.iloc[0]["Lat"]
+    # ref["longitude"] = series.iloc[0]["Long"]
     ref["longitude"] = 77.4891
     ref["latitude"] = 12.9223
     she_db.RescueGroupData.update_one({"_id":1},{"$set":ref},upsert=False)
