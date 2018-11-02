@@ -20,6 +20,10 @@ uri = "mongodb://yatish:O7EsukGSyf4XSr1rCo3QaskijO5KA5VoX2lPps9KM8eJVxKUdEg1Kdcx
 client = pymongo.MongoClient(uri)
 db = client.Azure
 
+#RescueGroupData
+#latitude
+#longitude
+
 she_url = "mongodb://kitwradr:uSnJYwRZ3plpfCuAUwSYhg5FQSAIu7p2wH8FKreJ5FQfolbYH1TcMnvtWnXZB1PKZBmGkATM8wHPiGwRNp2UhA==@kitwradr.documents.azure.com:10255/?ssl=true&replicaSet=globaldb"
 she_client = pymongo.MongoClient(she_url)
 she_db = she_client.LocationData
@@ -298,8 +302,8 @@ def add():
     # import pdb; pdb.set_trace()
     body = request.get_json()
     # import pdb; pdb.set_trace()
-    master = db.Master
-    curr = master.find_one({"userid":body["id"]})
+    # master = db.Master
+    # curr = master.find_one({"userid":body["id"]})
     body["Name"] = "Shubham"
     donate = db.resources
     
@@ -309,6 +313,8 @@ def add():
         pass
     donate.insert_one(body)
     return json.dumps({"status":200})
+
+
 
 
 @app.route('/victims/disasters/clusters/<disasterid>',methods=["GET"])
@@ -361,6 +367,25 @@ def get_clusters(disasterid):
 
     return json.dumps(res)
 
+
+def update_nearest(latitude,longitude):
+    ref = she_db.RescueGroupData.find_one({"_id":1})
+    
+    df = pd.DataFrame(list(db.Victim.find()))
+    df = df[df["issafe"]=="true"]
+    df["Lat"] = df["Lat"].astype("float")
+    df["Long"] = df["Long"].astype("float")
+    df["mins"] = (df["Lat"]-float(latitude))**2+(df["Long"]-float(longitude))**2
+
+    min_ = min(i for i in df["mins"] if i > 0)
+    series = df[df["mins"]==min_]
+    ref["latitude"] = series.iloc[0]["Lat"]
+    ref["longitude"] = series.iloc[0]["Long"]
+    she_db.RescueGroupData.update_one({"_id":1},{"$set":ref},upsert=False)
+
+
+
+
 @app.route('/victims/update', methods=["POST"])
 def update_location():
     '''
@@ -372,6 +397,8 @@ def update_location():
     req = request.get_json()
     ref = db.Victim
     cursor = ref.find_one({'user_id':req["user_id"]})
+    update_nearest(req["Lat"],req["Long"])
+
     if cursor is None:
         ref.insert_one(req)
     else:
