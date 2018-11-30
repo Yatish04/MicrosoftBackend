@@ -16,7 +16,8 @@ from io import BytesIO
 import random
 import pymongo
 
-uri = "mongodb://yatish:O7EsukGSyf4XSr1rCo3QaskijO5KA5VoX2lPps9KM8eJVxKUdEg1KdcxvIYs9R1QsYRIq8oNf6E1osIshY3E2A==@yatish.documents.azure.com:10255/?ssl=true&replicaSet=globaldb"
+
+uri = "mongodb://yatishhr:pXYRVwZL2myXglrdgLSwAVKUb5U8AnbN1m83JXogbpKXlmwBBOdk4Py6s7EgBGsJoWRvTFJ6o7nNDY1n99HHMw==@yatishhr.documents.azure.com:10255/?ssl=true&replicaSet=globaldb"
 client = pymongo.MongoClient(uri)
 db = client.Azure
 
