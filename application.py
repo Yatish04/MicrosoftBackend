@@ -441,7 +441,7 @@ def update_location():
         post = ref.find_one({"user_id":req["user_id"]})
         for attr in req:
             post[attr] = req[attr]
-        ref.update_one({"user_id":req["user_id"]},{"$set":post},upsert=False)
+        ref.update_one({"user_id":req["user_id"],"Disasterid":post["Disasterid"]},{"$set":post},upsert=False)
     return json.dumps({"status":200})
 
 
