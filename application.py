@@ -13,6 +13,7 @@ import json
 # import matplotlib.pyplot as plt
 # from PIL import Image
 # from matplotlib import patches
+from ast import literal_eval
 from io import BytesIO
 import random
 import pymongo
@@ -174,7 +175,7 @@ def addfacial(data,user_id,format_):
     
     uid=user_id+"facial"
     cursor["facial"] = "https://rvsafeimages.blob.core.windows.net/imagescontainer/"+uid+'.'+format_
-    ref.update_one({"user_id":user_id},{"$set":cursor},upsert=False)
+    ref.update_one({"user_id":user_id,"Disasterid":str(cursor["Disasterid"])},{"$set":cursor},upsert=False)
     block_blob_service = BlockBlobService(account_name='rvsafeimages', account_key='391TMmlvDdRWu+AsNX+ZMl1i233YQfP5dxo/xhMrPm22KtwWwwMmM9vFAJpJHrGXyBrTW4OoAInjHnby9Couug==')
     container_name ='imagescontainer'
     block_blob_service.create_blob_from_bytes(container_name,uid+"."+format_,data)
@@ -185,7 +186,7 @@ def addfacial(data,user_id,format_):
 
 @app.route('/victims/<userid>/facial',methods=['POST'])
 def facial(userid):
-    # import pdb; pdb.set_trace()
+    import pdb; pdb.set_trace()
     data=bytes(request.get_data())
     res={}
     addfacial(data,userid,"jpg")
@@ -224,7 +225,7 @@ def facial(userid):
             posts["priority"] = 1
         else:
             posts["priority"] = 2
-        cursor.update_one({"user_id":userid},{"$set":posts},upsert=False)
+        cursor.update_one({"user_id":userid,"Disasterid":posts["Disasterid"]},{"$set":posts},upsert=False)
     return json.dumps(res)
 
 
@@ -248,7 +249,6 @@ def send():
     reqs = db.Victim
     result = reqs.find()
     i=0
-
     res={}
     df = pd.DataFrame(list(result))
     wdf = df.sample(n=3).reset_index()
@@ -265,10 +265,11 @@ def send():
         res[userid]["Long"] = wdf.iloc[i]["Long"]
         res[userid]["numstuck"] = str(wdf.iloc[i]["numvictims"])
         res[userid]["priority"] = str(wdf.iloc[i]["priority"])
-        res[userid]["female"] = wdf.iloc[i]["victims"]["female"]
-        res[userid]["male"] = wdf.iloc[i]["victims"]["males"]
-        res[userid]["elders"] = wdf.iloc[i]["victims"]["elders"]
-        res[userid]["children"] = wdf.iloc[i]["victims"]["children"]
+        temp_dict = literal_eval(wdf.iloc[i]["victims"])
+        res[userid]["female"] = temp_dict["female"]
+        res[userid]["male"] = temp_dict["males"]
+        res[userid]["elders"] = temp_dict["elders"]
+        res[userid]["children"] = temp_dict["children"]
         res[userid]["user_id"] = str(userid)
         iters_+=1
         
@@ -287,10 +288,14 @@ def send():
     res[df.iloc[0]["user_id"]]["Long"] = df.iloc[0]["Long"]
     res[df.iloc[0]["user_id"]]["numstuck"] = str(df.iloc[0]["numvictims"])
     res[df.iloc[0]["user_id"]]["priority"] = str(df.iloc[0]["priority"])
-    res[df.iloc[0]["user_id"]]["female"] = df.iloc[0]["victims"]["female"]
-    res[df.iloc[0]["user_id"]]["male"] = df.iloc[0]["victims"]["males"]
-    res[df.iloc[0]["user_id"]]["elders"] = df.iloc[0]["victims"]["elders"]
-    res[df.iloc[0]["user_id"]]["children"] = df.iloc[0]["victims"]["children"]
+    try:
+        temp_dict = literal_eval(df.iloc[0]["victims"])
+    except:
+        temp_dict = df.iloc[0]["victims"]
+    res[df.iloc[0]["user_id"]]["female"] = temp_dict["female"]
+    res[df.iloc[0]["user_id"]]["male"] = temp_dict["males"]
+    res[df.iloc[0]["user_id"]]["elders"] = temp_dict["elders"]
+    res[df.iloc[0]["user_id"]]["children"] = temp_dict["children"]
     res[df.iloc[0]["user_id"]]["user_id"] = str(df.iloc[0]["user_id"])
     blobnames = df.iloc[0]["blobnames"]
     li = blobnames[len(blobnames)-3:]
