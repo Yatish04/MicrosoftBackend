@@ -186,7 +186,7 @@ def addfacial(data,user_id,format_):
 
 @app.route('/victims/<userid>/facial',methods=['POST'])
 def facial(userid):
-    import pdb; pdb.set_trace()
+    # import pdb; pdb.set_trace()
     data=bytes(request.get_data())
     res={}
     addfacial(data,userid,"jpg")
