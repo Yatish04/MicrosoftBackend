@@ -42,8 +42,8 @@ lists=[]
 for i in range(len(df)):
     temp={}
     temp["Address"] = str(df.iloc[i]["Address"])
-    temp["City"] = str(df.iloc[i]["City"])
+    temp["E-mail"] = str(df.iloc[i]["E-mail"])
     temp["Name"] = str(df.iloc[i]["Name"])
-    temp["items"] = str(df.iloc[i]["items"])
-    temp["phone_number"] = str(df.iloc[i]["phone_number"])
-    db.resources.insert(temp)
+    temp["Password"] = str(df.iloc[i]["Password"])
+    temp["myresources"] = str(df.iloc[i]["myresources"])
+    db.ngo_data.insert(temp)

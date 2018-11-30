@@ -4,6 +4,7 @@ from bson import ObjectId
 import requests,PyPDF2, io
 from sklearn.cluster import DBSCAN
 import numpy as np
+import fitz
 import pandas as pd
 #import pdb
 from flask import *
@@ -57,18 +58,29 @@ def hello():
 @app.route("/weather")
 def weather():
     req = requests.get('http://www.imd.gov.in/section/nhac/dynamic/allindiasevere.pdf')
-    open_pdf_file =  io.BytesIO(req.content)
-    read_pdf = PyPDF2.PdfFileReader(open_pdf_file)
-    num_pages = read_pdf.getNumPages()
+    doc = fitz.open("pdf",req.content)
+    num_pages = doc.pageCount
     res=""
     for i in range(int(num_pages)):
-        page_text = read_pdf.getPage(i).extractText()
+        page_text = doc.getPageText(i)
         splits = page_text.split('\n')
         if i==0:
-            res= res+" ".join(splits[5:-8])
+            res= res+" ".join(splits[5:-4])
+            try:
+                temp = res.split('♦')
+                res = ''.join(temp)
+            except:
+                pass
         else:
-            res= res+" ".join(splits[:-8])
-    print(res)
+            res= res+" ".join(splits[:-4])
+            try:
+                temp = res.split('♦')
+                res = ''.join(temp)
+            except:
+                pass
+
+
+    # print(res)
     js={}
     key="rand"
     sentences=res.split('.')
@@ -76,7 +88,7 @@ def weather():
     for i in sentences:
         sub_splits=i.split(':')
         if len(sub_splits)>1:
-            js[sub_splits[0]] = sub_splits[1]
+            js[sub_splits[0]] = sub_splits[1][2:]
             key=sub_splits[0]
         else:
             js[key] = js[key] +"."+ sub_splits[0]
