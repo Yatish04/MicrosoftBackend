@@ -6,4 +6,5 @@ pymongo
 pandas
 numpy
 scipy
+PyMuPDF
 scikit-learn
