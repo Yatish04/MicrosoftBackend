@@ -463,6 +463,11 @@ def upload_images(userid,disasterid,format_):
         files=[]
     else:
         files = cursor["blobnames"]
+    try:
+        files = literal_eval(files)
+    except:
+        pass
+
     uid=userid+str(nums)
     files.append(uid+"."+format_)
     cursor["blobnames"] = files
