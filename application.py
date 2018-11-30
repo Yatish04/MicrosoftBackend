@@ -26,7 +26,7 @@ db = client.Azure
 #latitude
 #longitude
 
-she_url = "mongodb://kitwradr:uSnJYwRZ3plpfCuAUwSYhg5FQSAIu7p2wH8FKreJ5FQfolbYH1TcMnvtWnXZB1PKZBmGkATM8wHPiGwRNp2UhA==@kitwradr.documents.azure.com:10255/?ssl=true&replicaSet=globaldb"
+she_url = "mongodb://hackathon1:WDe06PPSkGeGaGfEs0MB11nRSvAadFTPNkhToqU0vAsMwvSpbYUs2qxzBQu6LznPk23y56ZLBBwSZ5iiwonn7g==@hackathon1.documents.azure.com:10255/?ssl=true&replicaSet=globaldb"
 she_client = pymongo.MongoClient(she_url)
 she_db = she_client.LocationData
 she_dis = she_db.DisasterData
@@ -248,6 +248,7 @@ def send():
     reqs = db.Victim
     result = reqs.find()
     i=0
+
     res={}
     df = pd.DataFrame(list(result))
     wdf = df.sample(n=3).reset_index()
