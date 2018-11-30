@@ -65,14 +65,14 @@ def weather():
         page_text = doc.getPageText(i)
         splits = page_text.split('\n')
         if i==0:
-            res= res+" ".join(splits[5:-4])
+            res= res+" ".join(splits[5:-5])
             try:
                 temp = res.split('♦')
                 res = ''.join(temp)
             except:
                 pass
         else:
-            res= res+" ".join(splits[:-4])
+            res= res+" ".join(splits[:-5])
             try:
                 temp = res.split('♦')
                 res = ''.join(temp)
