@@ -48,7 +48,7 @@ she_dis = she_db.DisasterData
 #import pdb
 
 app=Flask(__name__)
-subscription_key = "42f0bf1632c0475293b2b331b9c03709"
+subscription_key = "501f22c3797048d2a73ae58a83ea9069"
 assert subscription_key
 
 @app.route("/")
@@ -140,7 +140,7 @@ def login_():
 
 
 def get_facial(data):
-    face_api_url = 'https://westeurope.api.cognitive.microsoft.com/face/v1.0/detect'
+    face_api_url = 'https://australiaeast.api.cognitive.microsoft.com/face/v1.0/detect'
 
     # Set image_url to the URL of an image that you want to analyze.
     headers = {'Ocp-Apim-Subscription-Key': subscription_key,
