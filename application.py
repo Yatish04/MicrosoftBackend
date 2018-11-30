@@ -408,7 +408,7 @@ def update_nearest(latitude,longitude):
     ref = she_db.RescueGroupData.find_one({"_id":1})
     df = pd.DataFrame(list(db.Victim.find()))
     df = df[df["issafe"]=="true"]
-    import pdb; pdb.set_trace()
+    # import pdb; pdb.set_trace()
     df["Lat"] = df["Lat"].astype("float")
     df["Long"] = df["Long"].astype("float")
     df["mins"] = (df["Lat"]-float(latitude))**2+(df["Long"]-float(longitude))**2
