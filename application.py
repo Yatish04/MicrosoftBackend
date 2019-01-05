@@ -451,6 +451,7 @@ def update_location():
 def upload_images(userid,disasterid,format_):
     data = request.get_data()
     ref = db.Victim
+    # import pdb; pdb.set_trace()
     cursor = ref.find_one({'user_id':userid})
     if len(list(cursor)) == 0:
         assert("Upload Failed")
@@ -463,6 +464,7 @@ def upload_images(userid,disasterid,format_):
         files=[]
     else:
         files = cursor["blobnames"]
+
     try:
         files = literal_eval(files)
     except:
