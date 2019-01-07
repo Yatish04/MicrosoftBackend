@@ -515,8 +515,9 @@ def update_medical():
     cond=js["medical_condition"]
     allergy=js["allergy"]
     notes=js["notes"]
+    name=js["name"]
     we=db.Victim.find_one({"user_id":user_id})
-    we["medical"]={"blood":blood,"height":height,"weight":weight,"medical_condtion":cond,"allergy":allergy,"notes":notes}
+    we["medical"]={"name":name,"blood":blood,"height":height,"weight":weight,"medical_condtion":cond,"allergy":allergy,"notes":notes}
     db.Victim.update_one({"user_id":user_id,"_id":we["_id"]},{"$set":we},upsert=False)
     return json.dumps({"status":200})
 
