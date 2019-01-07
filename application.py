@@ -517,7 +517,7 @@ def update_medical():
     notes=js["notes"]
     we=db.Victim.find_one({"user_id":user_id})
     we["medical"]={"blood":blood,"height":height,"weight":weight,"medical_condtion":cond,"allergy":allergy,"notes":notes}
-    db.Victim.update_one({"user_id":user_id},{"$set":we},upsert=False)
+    db.Victim.update_one({"user_id":user_id,"_id":we["_id"]},{"$set":we},upsert=False)
     return json.dumps({"status":200})
 
 @app.route('/victims/get/medical',methods=["POST"])
