@@ -517,9 +517,26 @@ def update_medical():
     notes=js["notes"]
     name=js["name"]
     we=db.Victim.find_one({"user_id":user_id})
-    we["medical"]={"name":name,"blood":blood,"height":height,"weight":weight,"medical_condtion":cond,"allergy":allergy,"notes":notes}
+    if "medical" in we and "blob" in we["medical"]:
+        b=we["medical"]["blob"]
+        we["medical"]={"name":name,"blood":blood,"height":height,"weight":weight,"medical_condtion":cond,"allergy":allergy,"notes":notes,"blob":b}
+    else:
+        we["medical"]={"name":name,"blood":blood,"height":height,"weight":weight,"medical_condtion":cond,"allergy":allergy,"notes":notes}
+    
     db.Victim.update_one({"user_id":user_id,"_id":we["_id"]},{"$set":we},upsert=False)
     return json.dumps({"status":200})
+
+@app.route('/victims/upload/<user_id>/<format_>/medical',methods=["POST"])
+def upload_medical_records(format_,user_id):
+    data = request.get_data()
+    block_blob_service = BlockBlobService(account_name='rvsafeimages', account_key='391TMmlvDdRWu+AsNX+ZMl1i233YQfP5dxo/xhMrPm22KtwWwwMmM9vFAJpJHrGXyBrTW4OoAInjHnby9Couug==')
+    container_name ='imagescontainer'
+    
+    block_blob_service.create_blob_from_bytes(container_name,"medical"+str(user_id)+"."+format_,data)
+    we=db.Victim.find_one({"user_id":user_id})
+    we["medical"]["blob"] = "https://rvsafeimages.blob.core.windows.net/imagescontainer/"+"medical"+str(user_id)+"."+format_
+    db.Victim.update_one({"user_id":user_id,"_id":we["_id"]},{"$set":we},upsert=False)
+    return json.dumps({"staus":200})
 
 @app.route('/victims/get/medical',methods=["POST"])
 def get_medical():
