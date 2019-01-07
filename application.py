@@ -504,3 +504,24 @@ def download_app():
 def download_server():
     import os
     return send_file(os.getcwd()+'/InstaHelp.apk',as_attachment=True,attachment_filename='InstaHelp.apk')
+
+@app.route('/victims/update/medical',methods=['POST'])
+def update_medical():
+    js=request.get_json()
+    user_id=js["user_id"]
+    blood=js['blood']
+    height=js['height']
+    weight=js['weight']
+    cond=js["medical_condition"]
+    allergy=js["allergy"]
+    notes=js["notes"]
+    we=db.Victim.find_one({"user_id":user_id})
+    we["medical"]={"blood":blood,"height":height,"weight":weight,"medical_condtion":cond,"allergy":allergy,"notes":notes}
+    db.Victim.update_one({"user_id":user_id},{"$set":we},upsert=False)
+    return json.dumps({"status":200})
+
+@app.route('/victims/get/medical',methods=["POST"])
+def get_medical():
+    js=request.get_json()
+    cur=db.Victim.find_one({"user_id":js["user_id"]})
+    return json.dumps({"status":200,"data":cur["medical"]})
