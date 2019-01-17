@@ -15,6 +15,7 @@ import json
 # from matplotlib import patches
 from ast import literal_eval
 from io import BytesIO
+import cognitive_face as cf
 import random
 import pymongo
 
@@ -543,3 +544,68 @@ def get_medical():
     js=request.get_json()
     cur=db.Victim.find_one({"user_id":js["user_id"]})
     return json.dumps({"status":200,"data":cur["medical"]})
+
+
+@app.route('/flushandcreate')
+def flush():
+    PERSON_GROUP_ID = 'victims'
+    BASE_URL='https://australiaeast.api.cognitive.microsoft.com/face/v1.0'
+    cf.BaseUrl.set(BASE_URL)
+    cf.Key.set(subscription_key)
+    try:
+        # cf.large_person_group.create('v')
+        cf.person_group.delete('victims')
+    except:
+        print('couldnt delete')
+        pass
+    
+    try:
+        cf.person_group.create('victims')
+    except:
+        print('couldnt create')
+        pass
+    return json.dumps({'status':200})
+
+@app.route('/victims/group/create/faceid',methods=['POST'])
+def create_faceid():
+    js=request.get_json()
+    name=js['name']
+    BASE_URL='https://australiaeast.api.cognitive.microsoft.com/face/v1.0'
+    cf.BaseUrl.set(BASE_URL)
+    cf.Key.set(subscription_key)
+    PERSON_GROUP_ID = 'victims' 
+    response = cf.person.create(PERSON_GROUP_ID, name)
+    return json.dumps(response)
+
+
+def train():
+    PERSON_GROUP_ID='victims'
+    
+
+
+@app.route('/victims/group/<faceid>/addface',methods=['POST'])
+def add_faces(faceid):
+    data = request.get_data()
+    PERSON_GROUP_ID = 'victims'
+    face_api_url = 'https://australiaeast.api.cognitive.microsoft.com/face/v1.0/persongroups/{}/persons/{}/persistedFaces'.format(PERSON_GROUP_ID,faceid)
+    headers={}
+    headers['Content-Type']= 'application/octet-stream'
+    headers['Ocp-Apim-Subscription-Key'] = subscription_key
+    response=requests.post(url=face_api_url,data=data,headers=headers)
+    print(response.text)
+    BASE_URL='https://australiaeast.api.cognitive.microsoft.com/face/v1.0'
+    cf.BaseUrl.set(BASE_URL)
+    cf.Key.set(subscription_key)
+    cf.person_group.train(PERSON_GROUP_ID)
+    print(cf.person_group.get_status(PERSON_GROUP_ID))
+    return json.dumps({"status":"200"})
+    #https://australiaeast.api.cognitive.microsoft.com/face/v1.0/largepersongroups/victim
+
+@app.route('/victims/is_safe',methods=['POST'])
+def safevictims():
+    js=request.get_json()
+    d=db.ngo_data.find_one({'intent':'safe'})
+    for i in d['rescued']:
+        if js['name'] in i[0]:
+            return json.dumps({'status':200,"message":"found","url":i[1]})
+    return json.dumps({'status':400,'message':'notfound'})
