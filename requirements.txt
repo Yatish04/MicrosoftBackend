@@ -9,3 +9,4 @@ scipy
 PyMuPDF
 scikit-learn
 cognitive_face
+fpdf

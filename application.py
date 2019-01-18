@@ -10,6 +10,7 @@ import pandas as pd
 from flask import *
 from azure.storage.blob import BlockBlobService, PublicAccess
 import json
+import time
 # import matplotlib.pyplot as plt
 # from PIL import Image
 # from matplotlib import patches
@@ -18,7 +19,7 @@ from io import BytesIO
 import cognitive_face as cf
 import random
 import pymongo
-
+import os
 uri = "mongodb://yatishhr:skv5d9yiRMuHeS0ft5aYipjLAErgy0KEg5iacaWTWUW5JwdskJAlXVYZagWJfWD46ZILskdyxDWhtH2YXl7YdA==@yatishhr.documents.azure.com:10255/?ssl=true&replicaSet=globaldb"
 
 # uri = "mongodb://yatishhr:pXYRVwZL2myXglrdgLSwAVKUb5U8AnbN1m83JXogbpKXlmwBBOdk4Py6s7EgBGsJoWRvTFJ6o7nNDY1n99HHMw==@yatishhr.documents.azure.com:10255/?ssl=true&replicaSet=globaldb"
@@ -53,6 +54,77 @@ she_dis = she_db.DisasterData
 app=Flask(__name__)
 subscription_key = "501f22c3797048d2a73ae58a83ea9069"
 assert subscription_key
+
+
+
+
+from fpdf import FPDF
+
+title = 'Medical Report Of The Victim'
+
+class PDF(FPDF):
+    def header(self):
+        # Arial bold 15
+        self.set_font('Arial', 'B', 15)
+        # Calculate width of title and position
+        w = self.get_string_width(title) + 6
+        self.set_x((210 - w) / 2)
+        # Colors of frame, background and text
+        self.set_draw_color(0, 80, 180)
+        self.set_fill_color(230, 230, 0)
+        self.set_text_color(220, 50, 50)
+        # Thickness of frame (1 mm)
+        self.set_line_width(1)
+        # Title
+        self.cell(w, 9, title, 1, 1, 'C', 1)
+        # Line break
+        self.ln(10)
+
+    def footer(self):
+        # Position at 1.5 cm from bottom
+        self.set_y(-15)
+        # Arial italic 8
+        self.set_font('Arial', 'I', 8)
+        # Text color in gray
+        self.set_text_color(128)
+        # Page number
+        self.cell(0, 10, 'Page ' + str(self.page_no()), 0, 0, 'C')
+
+    def chapter_title(self, num, label):
+        # Arial 12
+        self.set_font('Arial', '', 12)
+        # Background color
+        self.set_fill_color(200, 220, 255)
+        # Title
+        self.cell(0, 6, '%s' % (label), 0, 1, 'L', 1)
+        # Line break
+        self.ln(4)
+
+    def chapter_body(self, name):
+        # Read text file
+        txt="This is a sample txt"
+        # Times 12
+        self.set_font('Times', '', 12)
+        # Output justified text
+        self.multi_cell(0, 5, txt)
+        # Line break
+        self.ln()
+        # Mention in italics
+        self.set_font('', 'I')
+        self.cell(0, 5, '(end of excerpt)')
+
+    def print_chapter(self, num, json1, name):
+        self.add_page()
+        for i in json1:
+
+            self.chapter_title(num, i.title()+" : "+ json1[i].title())
+
+
+
+
+
+
+
 
 @app.route("/")
 def hello():
@@ -539,11 +611,17 @@ def upload_medical_records(format_,user_id):
     db.Victim.update_one({"user_id":user_id,"_id":we["_id"]},{"$set":we},upsert=False)
     return json.dumps({"staus":200})
 
-@app.route('/victims/get/medical',methods=["POST"])
-def get_medical():
-    js=request.get_json()
-    cur=db.Victim.find_one({"user_id":js["user_id"]})
-    return json.dumps({"status":200,"data":cur["medical"]})
+@app.route('/victims/get/<user_id>/medical',methods=["GET"])
+def get_medical(user_id):
+    cur=db.Victim.find_one({"user_id":user_id})
+    pdf = PDF()
+    pdf.set_title(title)
+    pdf.set_author('RVSAFE')
+    pdf.print_chapter(1, cur['medical'], '20k_c1.txt')
+    pdf.output(user_id+'.pdf', 'F')
+    
+    return send_file(os.getcwd()+'/'+user_id+'.pdf',as_attachment=True,attachment_filename=user_id+'.pdf')
+     
 
 
 @app.route('/flushandcreate')
