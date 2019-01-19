@@ -677,7 +677,7 @@ def add_faces(faceid):
     cf.person_group.train(PERSON_GROUP_ID)
     print(cf.person_group.get_status(PERSON_GROUP_ID))
     return json.dumps({"status":"200"})
-    #https://australiaeast.api.cognitive.microsoft.com/face/v1.0/largepersongroups/victim
+
 
 @app.route('/victims/is_safe',methods=['POST'])
 def safevictims():
@@ -687,3 +687,47 @@ def safevictims():
         if js['name'] in i[0]:
             return json.dumps({'status':200,"message":"found","url":i[1]})
     return json.dumps({'status':400,'message':'notfound'})
+
+
+def getname(personid):
+    d=db.ngo_data.find_one({'type':'safe'})
+    PERSON_GROUP_ID='victims'
+    personlist=cf.person.lists(PERSON_GROUP_ID)
+    for i in d["rescued_urls"]:
+        response = cf.face.detect(i)
+        face_ids = [d['faceId'] for d in response]
+        identified_faces = cf.face.identify(face_ids, PERSON_GROUP_ID)
+        for k in identified_faces:
+            for j in personlist:
+                try:
+                    for t in k['candidates']:
+                        if 'personId' in t:
+                            if t['personId']==j['personId']==personid: 
+                                return (i,j['name'])
+                except:
+                    pass
+
+
+    return "",""
+
+
+@app.route('/victims/group/dummy/<seq>/<faceid>/addface',methods=['POST'])
+def add_faces1(faceid,seq):
+    data = request.get_data()
+    PERSON_GROUP_ID = 'victims'
+    face_api_url = 'https://australiaeast.api.cognitive.microsoft.com/face/v1.0/persongroups/{}/persons/{}/persistedFaces'.format(PERSON_GROUP_ID,faceid)
+    headers={}
+    headers['Content-Type']= 'application/octet-stream'
+    headers['Ocp-Apim-Subscription-Key'] = subscription_key
+    response=requests.post(url=face_api_url,data=data,headers=headers)
+    print(response.text)
+    BASE_URL='https://australiaeast.api.cognitive.microsoft.com/face/v1.0'
+    cf.BaseUrl.set(BASE_URL)
+    cf.Key.set(subscription_key)
+    cf.person_group.train(PERSON_GROUP_ID)
+    print(cf.person_group.get_status(PERSON_GROUP_ID))
+    time.sleep(2)
+    if seq=='9':
+        url,name=getname(faceid)
+        return json.dumps({"status":200,"url":url,"name":name})
+    return json.dumps({"status":"200"})
