@@ -94,7 +94,7 @@ class PDF(FPDF):
         # Arial 12
         self.set_font('Arial', '', 12)
         # Background color
-        self.set_fill_color(255, 255, 255)
+        # self.set_fill_color(255, 255, 255)
         # Title
         self.cell(0, 6, '%s' % (label), 0, 1, 'L', 1)
         # Line break
