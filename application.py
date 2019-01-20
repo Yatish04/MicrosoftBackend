@@ -60,7 +60,7 @@ assert subscription_key
 
 from fpdf import FPDF
 
-title = 'Medical Report Of The Victim'
+title = 'RVSAFE Medical ID'
 
 class PDF(FPDF):
     def header(self):
@@ -94,7 +94,7 @@ class PDF(FPDF):
         # Arial 12
         self.set_font('Arial', '', 12)
         # Background color
-        self.set_fill_color(200, 220, 255)
+        self.set_fill_color(255, 255, 255)
         # Title
         self.cell(0, 6, '%s' % (label), 0, 1, 'L', 1)
         # Line break
@@ -727,7 +727,10 @@ def add_faces1(faceid,seq):
     cf.person_group.train(PERSON_GROUP_ID)
     print(cf.person_group.get_status(PERSON_GROUP_ID))
     time.sleep(2)
+    loc="reliefcamp0"
     if seq=='9':
         url,name=getname(faceid)
-        return json.dumps({"status":200,"url":url,"name":name})
+        if len(url)==0:
+            loc=""
+        return json.dumps({"status":200,"url":url,"name":name,"loc":loc})
     return json.dumps({"status":"200"})
