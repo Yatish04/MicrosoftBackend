@@ -71,8 +71,8 @@ class PDF(FPDF):
         self.set_x((210 - w) / 2)
         # Colors of frame, background and text
         self.set_draw_color(0, 80, 180)
-        # self.set_fill_color(230, 230, 0)
-        self.set_text_color(220, 50, 50)
+        self.set_fill_color(230, 230, 0)
+        # self.set_text_color(220, 50, 50)
         # Thickness of frame (1 mm)
         self.set_line_width(1)
         # Title
@@ -94,7 +94,7 @@ class PDF(FPDF):
         # Arial 12
         self.set_font('Arial', '', 12)
         # Background color
-        # self.set_fill_color(255, 255, 255)
+        self.set_fill_color(255, 255, 255)
         # Title
         self.cell(0, 6, '%s' % (label), 0, 1, 'L', 1)
         # Line break
