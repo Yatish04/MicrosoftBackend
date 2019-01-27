@@ -547,7 +547,7 @@ def upload_images(userid,disasterid,format_):
     uid=userid+str(nums)
     files.append(uid+"."+format_)
     cursor["blobnames"] = files
-    ref.update_one({"user_id":userid,"Disasterid":disasterid},{"$set":cursor},upsert=False)
+    ref.update_one({"_id":cursor["_id"],"user_id":userid,"Disasterid":disasterid},{"$set":cursor},upsert=False)
     block_blob_service = BlockBlobService(account_name='rvsafeimages', account_key='391TMmlvDdRWu+AsNX+ZMl1i233YQfP5dxo/xhMrPm22KtwWwwMmM9vFAJpJHrGXyBrTW4OoAInjHnby9Couug==')
     container_name ='imagescontainer'
     block_blob_service.create_blob_from_bytes(container_name,uid+"."+format_,data)
