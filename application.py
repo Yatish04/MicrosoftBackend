@@ -249,7 +249,7 @@ def addfacial(data,user_id,format_):
     
     uid=user_id+"facial"
     cursor["facial"] = "https://rvsafeimages.blob.core.windows.net/imagescontainer/"+uid+'.'+format_
-    ref.update_one({"user_id":user_id,"Disasterid":str(cursor["Disasterid"])},{"$set":cursor},upsert=False)
+    ref.update_one({"_id":cursor["_id"], "user_id":user_id,"Disasterid":str(cursor["Disasterid"])},{"$set":cursor},upsert=False)
     block_blob_service = BlockBlobService(account_name='rvsafeimages', account_key='391TMmlvDdRWu+AsNX+ZMl1i233YQfP5dxo/xhMrPm22KtwWwwMmM9vFAJpJHrGXyBrTW4OoAInjHnby9Couug==')
     container_name ='imagescontainer'
     block_blob_service.create_blob_from_bytes(container_name,uid+"."+format_,data)
@@ -299,7 +299,7 @@ def facial(userid):
             posts["priority"] = 1
         else:
             posts["priority"] = 2
-        cursor.update_one({"user_id":userid,"Disasterid":posts["Disasterid"]},{"$set":posts},upsert=False)
+        cursor.update_one({"_id":cursor["_id"],"user_id":userid,"Disasterid":posts["Disasterid"]},{"$set":posts},upsert=False)
     return json.dumps(res)
 
 
@@ -516,7 +516,7 @@ def update_location():
         post = ref.find_one({"user_id":req["user_id"]})
         for attr in req:
             post[attr] = req[attr]
-        ref.update_one({"user_id":req["user_id"],"Disasterid":post["Disasterid"]},{"$set":post},upsert=False)
+        ref.update_one({"_id":cursor["_id"],"user_id":req["user_id"],"Disasterid":post["Disasterid"]},{"$set":post},upsert=False)
     return json.dumps({"status":200})
 
 
