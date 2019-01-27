@@ -299,7 +299,7 @@ def facial(userid):
             posts["priority"] = 1
         else:
             posts["priority"] = 2
-        cursor.update_one({"_id":cursor["_id"],"user_id":userid,"Disasterid":posts["Disasterid"]},{"$set":posts},upsert=False)
+        cursor.update_one({"_id":posts["_id"],"user_id":userid,"Disasterid":posts["Disasterid"]},{"$set":posts},upsert=False)
     return json.dumps(res)
 
 
