@@ -30,7 +30,7 @@ db = client.Azure
 #latitude
 #longitude
 
-she_url = "mongodb://hackathon1:WDe06PPSkGeGaGfEs0MB11nRSvAadFTPNkhToqU0vAsMwvSpbYUs2qxzBQu6LznPk23y56ZLBBwSZ5iiwonn7g==@hackathon1.documents.azure.com:10255/?ssl=true&replicaSet=globaldb"
+she_url = "mongodb://yatishhr:skv5d9yiRMuHeS0ft5aYipjLAErgy0KEg5iacaWTWUW5JwdskJAlXVYZagWJfWD46ZILskdyxDWhtH2YXl7YdA==@yatishhr.documents.azure.com:10255/?ssl=true&replicaSet=globaldb"
 she_client = pymongo.MongoClient(she_url)
 she_db = she_client.LocationData
 she_dis = she_db.DisasterData
