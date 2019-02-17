@@ -41,11 +41,11 @@ pdb.set_trace()
 #     db.resources.insert(temp)
 
 
-for i in range(len(df)):
-    temp={}
-    temp["Address"] = str(df.iloc[i]["Address"])
-    temp["E-mail"] = str(df.iloc[i]["E-mail"])
-    temp["Name"] = str(df.iloc[i]["Name"])
-    temp["Password"] = str(df.iloc[i]["Password"])
-    temp["myresources"] = str(df.iloc[i]["myresources"])
-    db.ngo_data.insert(temp)
+# for i in range(len(df)):
+#     temp={}
+#     temp["Address"] = str(df.iloc[i]["Address"])
+#     temp["E-mail"] = str(df.iloc[i]["E-mail"])
+#     temp["Name"] = str(df.iloc[i]["Name"])
+#     temp["Password"] = str(df.iloc[i]["Password"])
+#     temp["myresources"] = str(df.iloc[i]["myresources"])
+#     db.ngo_data.insert(temp)
